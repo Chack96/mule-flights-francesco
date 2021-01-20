@@ -14,12 +14,12 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 		<db:my-sql-connection host="mudb.learn.mulesoft.com" port="3306" user="mule" password="mule" database="training" />
 	</db:config>
 	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="f57ac518-dcef-40ce-8d05-9cc32f19e098" />
-	<flow name="hellFlow" doc:id="570dc632-eb74-49c8-9a96-ada558399ec8" >
-		<http:listener doc:name="GET /flights" doc:id="fde55cf5-420d-4a24-b201-d17d086df992" config-ref="HTTP_Listener_config" path="/flights" allowedMethods="GET"/>
-		<db:select doc:name="Select all flights" doc:id="88028be3-f149-4b7f-b9bd-3bfd6409c365" config-ref="Database_Config">
-			<db:sql ><![CDATA[select * from american]]></db:sql>
-		</db:select>
-		<flow-ref doc:name="Flow Reference" doc:id="8fa53dee-06c6-46d3-b30d-3f9fe9cabbe4" name="Commontransformandlog"/>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="6c2e15d6-e7bc-4ddf-bb5e-308173a9d2b4" basePath="/api/timezone" >
+		<http:request-connection host="worldtimeapi.org" port="80" />
+	</http:request-config>
+	<flow name="helloworldFlow" doc:id="8ec3176a-b77d-479f-8a72-52694a426212" >
+		<http:listener doc:name="Listener" doc:id="296ce703-b53f-42cd-9fb4-69a0a3a14ba9" config-ref="HTTP_Listener_config" path="/time"/>
+		<http:request method="GET" doc:name="Request" doc:id="3e04a9d3-23ad-4adb-8d18-8d5b00aa3971" config-ref="HTTP_Request_configuration" path="/Europe/" responseTimeout="60000"/>
 	</flow>
 	<flow name="PostFlight" doc:id="ad33489b-8bab-429b-b6cb-200a8cabb96b" >
 		<http:listener doc:name="Listener" doc:id="377690aa-e0e2-4c02-8b8d-37d6e7793f92" config-ref="HTTP_Listener_config" path="/flights" allowedMethods="POST"/>
@@ -42,7 +42,7 @@ output application/json
 				</db:select>
 			</when>
 			<otherwise >
-				<db:select doc:name="Copy_of_Select all flights by ID" doc:id="dfcd12ea-fec7-43ba-b62d-6470138ce2d3" config-ref="Database_Config">
+				<db:select doc:name="Select flights by destination" doc:id="dfcd12ea-fec7-43ba-b62d-6470138ce2d3" config-ref="Database_Config">
 			<db:sql><![CDATA[select * from american where toairport = :destination]]></db:sql>
 			<db:input-parameters><![CDATA[#[{destination : vars.destination}]]]></db:input-parameters>
 		</db:select>
