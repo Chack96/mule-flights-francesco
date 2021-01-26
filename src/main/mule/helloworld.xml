@@ -7,22 +7,12 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
-	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="6b1c8801-c06f-47bd-850b-1eb1416a3fac" >
-		<http:listener-connection host="0.0.0.0" port="8081" />
-	</http:listener-config>
-	<db:config name="Database_Config" doc:name="Database Config" doc:id="7264419a-ff2a-4b21-890b-d3687077e75e" >
-		<db:my-sql-connection host="mudb.learn.mulesoft.com" port="3306" user="mule" password="mule" database="training" />
-	</db:config>
-	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="f57ac518-dcef-40ce-8d05-9cc32f19e098" />
-	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="6c2e15d6-e7bc-4ddf-bb5e-308173a9d2b4" basePath="/api/timezone" >
-		<http:request-connection host="worldtimeapi.org" port="80" />
-	</http:request-config>
+
 	<flow name="helloworldFlow" doc:id="8ec3176a-b77d-479f-8a72-52694a426212" >
 		<http:listener doc:name="Listener" doc:id="296ce703-b53f-42cd-9fb4-69a0a3a14ba9" config-ref="HTTP_Listener_config" path="/time"/>
 		<http:request method="GET" doc:name="Request" doc:id="3e04a9d3-23ad-4adb-8d18-8d5b00aa3971" config-ref="HTTP_Request_configuration" path="/Europe/" responseTimeout="60000"/>
 	</flow>
 	<flow name="PostFlight" doc:id="ad33489b-8bab-429b-b6cb-200a8cabb96b" >
-		<http:listener doc:name="Listener" doc:id="377690aa-e0e2-4c02-8b8d-37d6e7793f92" config-ref="HTTP_Listener_config" path="/flights" allowedMethods="POST"/>
 		<ee:transform doc:name="Transform Message" doc:id="b3159c1a-c48b-463b-b24c-54407dee7d07" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -33,7 +23,6 @@ output application/json
 		</ee:transform>
 	</flow>
 	<flow name="GetFlightbyDest" doc:id="b973100d-3136-4d13-b21e-b3f4f8ed823b">
-		<http:listener doc:name="GET /flightsDestination" doc:id="e729a8b5-22cc-4291-9006-58752aeb28b8" config-ref="HTTP_Listener_config" path="/flights?destination={destination}" allowedMethods="GET" />
 		<set-variable value="#[message.attributes.queryParams.destination]" doc:name="Set Destination" doc:id="48d317cc-f715-4302-b657-4e7490e4b00c" variableName="destination"/>
 		<choice doc:name="Choice" doc:id="d3414201-35c6-47cb-9918-85e2e4e70e95" >
 			<when expression="#[vars.destination == null]">
@@ -48,7 +37,7 @@ output application/json
 		</db:select>
 			</otherwise>
 		</choice>
-		<flow-ref doc:name="Flow Reference" doc:id="b2f67934-a2fb-4f25-92a4-38859792b337" name="Commontransformandlog"/>
+		<flow-ref doc:name="Flow Reference" doc:id="05f7c1ac-14be-45be-b048-adfbc5c802f4" name="Commontransformandlog"/>
 	</flow>
 	<sub-flow name="Commontransformandlog" doc:id="618205e8-f612-46f0-9037-bd679129738d" >
 		<ee:transform doc:name="Transform" doc:id="9441eb4e-53c8-409d-9f9d-140dea7e2452">
@@ -62,13 +51,12 @@ payload]]></ee:set-payload>
 		<logger level="INFO" doc:name="Log fetched IDs" doc:id="fccabcd7-6141-4002-a47f-1cf6735c245f" message="#[payload.ID]" />
 	</sub-flow>
 	<flow name="GetflightbyID" doc:id="6986c883-417d-4588-8c41-1cde309cdf00" >
-		<http:listener doc:name="GET /flightsId" doc:id="1abed0dd-bac5-47ae-9ace-cb94629f6b81" config-ref="HTTP_Listener_config" path="/flights/{ID}" allowedMethods="GET" />
 		<set-variable value="#[message.attributes.uriParams.ID]" doc:name="Set Flight Id" doc:id="c0cc504c-5862-4815-a71c-4897345dc255" variableName="flightId" />
 		<validation:is-number numberType="INTEGER" doc:name="Is number" doc:id="7bc723bf-7859-4c7c-bd60-89bf9f5be527" config-ref="Validation_Config" value="#[vars.flightId]" minValue="0"/>
 		<db:select doc:name="Select all flights by ID" doc:id="8f7261a7-e476-45f3-8795-f3cce4fe485f" config-ref="Database_Config" >
 			<db:sql ><![CDATA[select * from american where ID = :ID]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{ID : vars.flightId}]]]></db:input-parameters>
 		</db:select>
-		<flow-ref doc:name="Flow Reference" doc:id="82be67e2-bbac-43a1-bd09-0eaf81908f7a" name="Commontransformandlog"/>
+		<flow-ref doc:name="Flow Reference" doc:id="540120ee-0741-401d-accc-a914ce951f3d" name="Commontransformandlog"/>
 	</flow>
 </mule>
